@@ -4,7 +4,7 @@ using System.Collections;
 public class movementController : MonoBehaviour {
 
 	Animator a;
-	float speed = 2;
+	float speed;
 
 	
 	void Start () {
@@ -13,12 +13,14 @@ public class movementController : MonoBehaviour {
 
 	void Update () {
 		if (Input.GetKey ("left")) {
+			speed = -2;
 			a.SetBool("onRight",true);
 			if(transform.rotation != Quaternion.Euler(0, 180, 0)) transform.rotation = Quaternion.Euler(0, 180, 0);
 		}
-		else a.SetBool("onLeft",false);
+		else a.SetBool("onRight",false);
 		if (Input.GetKey ("right")) {
 			a.SetBool("onRight",true);
+			speed = 2;
 			if(transform.rotation != Quaternion.Euler(0, 0, 0)) transform.rotation = Quaternion.Euler(0, 0, 0);
 		}
 		else a.SetBool("onRight",false);
