@@ -25,7 +25,7 @@ public class movementController : MonoBehaviour {
 		}
 		else a.SetBool("onRight",false);
 		float translation = Input.GetAxis ("Horizontal") * speed * Time.deltaTime;
-		transform.Translate (translation , 0, 0);
+		transform.position = new Vector3(transform.position.x + translation, transform.position.y, transform.position.z);
 	}
 
 
