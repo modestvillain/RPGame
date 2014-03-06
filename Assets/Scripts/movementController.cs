@@ -6,6 +6,8 @@ public class movementController : MonoBehaviour {
 	Animator a;
 	CharacterController c;
 	float speed=2f;
+	bool facingRight=true,
+		 facingLeft=false;
 
 	
 	void Start () {
@@ -19,18 +21,31 @@ public class movementController : MonoBehaviour {
 		if (Input.GetKey ("left")) {
 			posx-=speed*Time.deltaTime;
 			a.SetBool("onRight",true);
-			if(transform.rotation != Quaternion.Euler(0, 180, 0)) transform.rotation = Quaternion.Euler(0, 180, 0);
+			if(facingRight)	{
+				Debug.Log ("run");
+				Vector3 v = transform.localScale;
+				v.x *= -1;
+				transform.localScale = v;
+				facingRight=false;
+				facingLeft=true;
+			}
 		}
-		else a.SetBool("onRight",false);
-		if (Input.GetKey ("right")) {
+		//else a.SetBool("onRight",false);
+		else if (Input.GetKey ("right")) {
 			posx+=speed*Time.deltaTime;
 			a.SetBool("onRight",true);
-			if(transform.rotation != Quaternion.Euler(0, 0, 0)) transform.rotation = Quaternion.Euler(0, 0, 0);
+			if(facingLeft)	{
+				Vector3 v = transform.localScale;
+				v.x *= -1;
+				transform.localScale = v;
+				facingLeft=false;
+				facingRight=true;
+			}
 		}
 		else a.SetBool("onRight",false);
 		float x = Input.GetAxis ("Horizontal") * speed * Time.deltaTime;
-		posy -= 9.81f * Time.deltaTime;
-		c.SimpleMove(new Vector3(0, 0, 0) );
+		//posy -= 9.81f * Time.deltaTime;
+		//c.SimpleMove(new Vector3(1, 1, 0) );
 		//transform.position = new Vector3(pos, transform.position.y, transform.position.z);
 		if(c.isGrounded) Debug.Log("yeah");
 	}
