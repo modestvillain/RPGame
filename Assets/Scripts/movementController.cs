@@ -2,60 +2,106 @@
 using System.Collections;
 
 public class movementController : MonoBehaviour {
-
+	
 	Animator a;
-	CharacterController c;
-	GameObject player;
-	float speed=2f;
-	bool facingRight=true;
+	Collider2D box;
+	float speed=2f,
+		  maxHeight=.7f,
+		  originalY=0f;
+	bool facingRight=true,
+		 colliding=false,
+		 grounded=true,
+		 reachedMax=false,
+		 jumped=false;
 
 	void Start () {
 		a = GetComponent<Animator> ();
-		c = GetComponent<CharacterController> ();
-		player = c.gameObject;
+		box = GetComponent<BoxCollider2D>();
 	}
+	
+	void FixedUpdate () {
 
-	void Update () {
-		float posx = transform.position.x;
-		float posy = transform.position.y;
+		/* 
+		 * Get user input
+		 */
+		if(Input.GetKeyDown("space") && grounded) {
+			grounded=false;
+			jumped=true;
+			originalY=transform.position.y;
+		}
 		if (Input.GetKey ("left")) {
-			posx-=speed*Time.deltaTime;
-
 			if(facingRight)	{
-				gameObject.SetActive(false);
-				Flip (player);
-				Debug.Log (transform.localScale + "LEFT");
+				Flip ();
 			}
-			a.SetBool("onRight",true);
-			gameObject.SetActive(true);
+			a.SetBool("moving",true);
 		}
 		else if (Input.GetKey ("right")) {
-			posx+=speed*Time.deltaTime;
-
 			if(!facingRight) {
-				Flip (player);
-				Debug.Log (transform.localScale + "RIGHT");
+				Flip ();
 			}
-			a.SetBool("onRight",true);
+			a.SetBool("moving",true);
 		}
-		else a.SetBool("onRight",false);
-		c.SimpleMove(Physics.gravity);
-		//float x = Input.GetAxis ("Horizontal") * speed * Time.deltaTime;
-		//posy -= 9.81f * Time.deltaTime;
-		//c.SimpleMove(new Vector3(1, 1, 0) );
-		//transform.position = new Vector3(pos, transform.position.y, transform.position.z);
-		if(c.isGrounded) Debug.Log("yeah");
+		else a.SetBool("moving",false);
+
+		rigidbody2D.velocity = Move ();
 	}
 
-	void OnControllerColliderHit(ControllerColliderHit hit) {
-		Debug.Log ("collided");
-		c.SimpleMove(new Vector3(0,0,0) );
+	/*
+	 * If collision came from below, reallow jumps
+	 * 
+	 * "The only problem with it is if for some reason
+	 * the initial collision is not below - but you
+	 * could probably use OnCollisionStay to solve that"
+	 * http://answers.unity3d.com/questions/40588/detect-collision-from-bottom.html
+	 */
+	void OnCollisionEnter2D(Collision2D c) {
+		ContactPoint2D contact = c.contacts[0];
+		if(Vector2.Dot(contact.normal, Vector2.up) > 0.5 ||
+		   Vector2.Dot(c.contacts[c.contacts.Length-1].normal, Vector2.up) > 0.5)
+		{
+			Debug.Log("cheese");
+			grounded = true;
+			reachedMax = false;
+			jumped = false;
+		}
 	}
 
-	void Flip(GameObject g) {
-		Vector3 v = g.transform.localScale;
+	void OnCollisionExit2D(Collision2D c) {
+		grounded = false;
+	}
+
+	/*
+	 * Flip sprite from either left->right or right->left
+	 */
+	void Flip() {
+		Vector3 v = gameObject.transform.localScale;
 		v.x *= -1;
-		g.transform.localScale = v;
-		facingRight=!facingRight;
+		gameObject.transform.localScale = v;
+		facingRight =! facingRight;
+	}
+
+	/*
+	 * Calculates the vector to set player velocity to
+	 */
+	Vector2 Move() {
+		Vector2 m = new Vector2 (Input.GetAxis ("Horizontal"), Input.GetAxis ("Vertical"));
+		m = transform.TransformDirection (m);
+		m *= speed;
+		if (!grounded && !reachedMax && jumped) {
+			if(transform.position.y-originalY>=maxHeight) {
+				reachedMax=true;
+			}
+			else {
+				m.y += 50 * speed * Time.deltaTime;
+			}
+		}
+		else {
+			m.y -= 10 * 9.8f * Time.deltaTime;
+		}
+		return m;
+	}
+
+	public Vector2 getPosition() {
+		return gameObject.transform.position;
 	}
 }
