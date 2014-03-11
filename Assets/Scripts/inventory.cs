@@ -46,8 +46,8 @@ public static class Inventory {
 		screen.SetActive (visible);
 		for(int i=0; i<index ; i++) {
 			Vector2 position = screen.transform.position;
-			position.x -= 4;
-			position.y += 1;
+			position.x -= .5f;
+			position.y += 1f;
 			items[i].transform.position = position;
 			items[i].SetActive (visible);
 		}
