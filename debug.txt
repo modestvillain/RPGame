@@ -1,0 +1,3 @@
+DAMAGE
+* Spikes are not tagged as ground, can't jump
+	--- POTENTIAL SOLUTION: give everything a type "ground" or put everything necessary under ground in hierarchy
